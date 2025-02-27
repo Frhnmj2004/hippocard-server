@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/Frhnmj2004/hippocard-server/api/routes"
@@ -11,40 +12,47 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+
+	firebaseLib "firebase.google.com/go" // Alias for clarity
+	"google.golang.org/api/option"
 )
 
 func main() {
-	// Load environment variables from .env
+	// Load env var
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file: ", err)
 	}
 
-	// Load unified config from configs package
+	// Load unified config
 	config, err := configs.LoadConfig()
 	if err != nil {
 		log.Fatal("Failed to load config: ", err)
 	}
 
-	// Initialize Firebase Authentication
-	authClient, err := firebase.NewAuthClient(&config.Firebase)
+	firebaseApp, err := firebaseLib.NewApp(context.Background(), nil, option.WithCredentialsFile(config.Firebase.CredentialsPath))
+	if err != nil {
+		log.Fatal("Failed to initialize Firebase app: ", err)
+	}
+	// Initialize Firebase Auth
+	authClient, err := firebase.NewAuthClient(firebaseApp)
 	if err != nil {
 		log.Fatal("Could not initialize Firebase Auth: ", err)
 	}
 
 	// Initialize Firestore
-	firestoreClient, err := firebase.NewFirestoreClient(&config.Firebase)
+	firestoreClient, err := firebase.NewFirestoreClient(firebaseApp)
 	if err != nil {
 		log.Fatal("Could not initialize Firestore: ", err)
 	}
 
-	// Initialize Blockchain client (Polygon)
+	// Initialize Blockchain client - poly
 	blockchainClient, err := blockchain.NewClient(&config.Blockchain)
 	if err != nil {
 		log.Fatal("Could not initialize Blockchain client: ", err)
 	}
 
-	// Initialize IPFS client
+	// Initialize IPFS
 	ipfsClient, err := storage.NewIPFSClient(&config.IPFS)
 	if err != nil {
 		log.Fatal("Could not initialize IPFS client: ", err)
