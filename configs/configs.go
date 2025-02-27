@@ -6,24 +6,20 @@ import (
 	"os"
 )
 
-// FirebaseConfig holds Firebase-related settings
 type FirebaseConfig struct {
 	CredentialsPath string
 }
 
-// BlockchainConfig holds Polygon blockchain settings
 type BlockchainConfig struct {
 	RPCURL          string
 	ContractAddress string
 }
 
-// IPFSConfig holds IPFS settings
 type IPFSConfig struct {
 	APIKey string
 	Secret string
 }
 
-// Config aggregates all configurations
 type Config struct {
 	ServerPort string
 	Firebase   FirebaseConfig
