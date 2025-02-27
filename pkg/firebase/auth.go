@@ -5,24 +5,15 @@ import (
 	"context"
 	"log"
 
-	firebase "firebase.google.com/go"
+	firebase "firebase.google.com/go" // Updated path
 	"firebase.google.com/go/auth"
-	"github.com/Frhnmj2004/hippocard-server/configs"
-	"google.golang.org/api/option"
 )
 
 type AuthClient struct {
 	Client *auth.Client
 }
 
-func NewAuthClient(config *configs.Config) (*AuthClient, error) {
-	opt := option.WithCredentialsFile(config.Firebase.CredentialsPath)
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		log.Printf("Failed to initialize Firebase app: %v", err)
-		return nil, err
-	}
-
+func NewAuthClient(app *firebase.App) (*AuthClient, error) {
 	// Initialize the Auth client
 	client, err := app.Auth(context.Background())
 	if err != nil {

@@ -27,7 +27,7 @@ func NewIPFSClient(config *configs.Config) (*IPFSClient, error) {
 	shell.SetHeader("pinata_api_key", config.IPFS.APIKey)
 	shell.SetHeader("pinata_secret_api_key", config.IPFS.Secret)
 
-	// Verify connection (optional, but useful for debugging)
+	// Verify connection
 	ctx := context.Background()
 	if _, err := shell.ID(ctx); err != nil {
 		log.Printf("Failed to connect to IPFS (Pinata): %v", err)
@@ -37,7 +37,7 @@ func NewIPFSClient(config *configs.Config) (*IPFSClient, error) {
 	return &IPFSClient{Shell: shell}, nil
 }
 
-// AddData uploads data to IPFS and returns the CID (Content Identifier)
+// AddData uploads data to IPFS and returns CID
 func (c *IPFSClient) AddData(data []byte) (string, error) {
 	reader := bytes.NewReader(data)
 	cid, err := c.Shell.Add(reader)
