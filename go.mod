@@ -5,9 +5,6 @@ go 1.24.0
 require (
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/joho/godotenv v1.5.1
-	firebase.google.com/go v3.13.0+incompatible
-	firebase.google.com/go/auth v3.13.0+incompatible
-	google.golang.org/api v0.223.0
 )
 
 require (
