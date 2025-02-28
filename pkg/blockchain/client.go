@@ -28,9 +28,9 @@ type Config struct {
 }
 
 // NewClient initializes a new Polygon blockchain client
-func NewClient(config *configs.Config) (*Client, error) {
+func NewClient(config *configs.BlockchainConfig) (*Client, error) {
 	// Connect to Polygon RPC (e.g., Mumbai testnet)
-	ethClient, err := ethclient.Dial(config.Blockchain.RPCURL)
+	ethClient, err := ethclient.Dial(config.RPCURL)
 	if err != nil {
 		log.Printf("Failed to connect to Polygon RPC: %v", err)
 		return nil, err
@@ -44,7 +44,7 @@ func NewClient(config *configs.Config) (*Client, error) {
 	}
 
 	// Convert contract address string to common.Address
-	contractAddr := common.HexToAddress(config.Blockchain.ContractAddress)
+	contractAddr := common.HexToAddress(config.ContractAddress)
 
 	// TODO: Bind to PrescriptionNFT contract (requires ABI)
 	// For now, we leave Contract as nil; you'll need to generate the binding later

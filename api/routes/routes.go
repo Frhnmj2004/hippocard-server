@@ -62,7 +62,7 @@ func (r *Repository) SetupRoutes(app *fiber.App) {
 	pharmacist.Post("/prescription/dispense", pharmacistCtrl.DispensePrescriptionHandler)
 
 	// Hospital routes (authenticated, one-time access)
-	hospital := app.Group("/api/hospital", middleware.AuthMiddleware(r.Auth, "hospital"), middleware.OneTimeAccess(r.Auth))
+	hospital := app.Group("/api/hospital", middleware.AuthMiddleware(r.Auth, "hospital"), middleware.OneTimeAccess(r.Auth, r.Firestore))
 	hospital.Get("/patient/:nfc_id", hospitalCtrl.PatientDataHandler) // One-time access logic TBD
 }
 

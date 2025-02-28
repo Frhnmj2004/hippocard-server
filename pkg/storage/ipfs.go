@@ -1,35 +1,37 @@
-// IPFS client for medical history
 package storage
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"log"
+	"net/http"
 
 	"github.com/Frhnmj2004/hippocard-server/configs"
 
 	ipfsapi "github.com/ipfs/go-ipfs-api"
 )
 
-// IPFSClient manages interactions with IPFS
+// IPFSClient manages interactions with IPFS via Pinata
 type IPFSClient struct {
 	Shell *ipfsapi.Shell
 }
 
-// NewIPFSClient initializes a new IPFS client using Pinata or a custom IPFS node
-func NewIPFSClient(config *configs.Config) (*IPFSClient, error) {
-	// Use Pinata's gateway with API key and secret
-	// Pinata endpoint: https://api.pinata.cloud/psa
-	shell := ipfsapi.NewShell("https://api.pinata.cloud/psa")
+// NewIPFSClient initializes a new IPFS client using Pinata with authentication
+func NewIPFSClient(config *configs.IPFSConfig) (*IPFSClient, error) {
+	// Create a custom HTTP client with Pinata authentication
+	customClient := &http.Client{
+		Transport: &roundTripperWithAuth{
+			transport: http.DefaultTransport.(*http.Transport), // Type assertion to *http.Transport
+			apiKey:    config.APIKey,
+			secret:    config.Secret,
+		},
+	}
 
-	// Set Pinata authentication headers
-	shell.SetHeader("pinata_api_key", config.IPFS.APIKey)
-	shell.SetHeader("pinata_secret_api_key", config.IPFS.Secret)
+	// Initialize Shell with the custom client
+	shell := ipfsapi.NewShellWithClient("https://api.pinata.cloud/psa", customClient)
 
 	// Verify connection
-	ctx := context.Background()
-	if _, err := shell.ID(ctx); err != nil {
+	if _, err := shell.ID(); err != nil {
 		log.Printf("Failed to connect to IPFS (Pinata): %v", err)
 		return nil, err
 	}
@@ -37,7 +39,7 @@ func NewIPFSClient(config *configs.Config) (*IPFSClient, error) {
 	return &IPFSClient{Shell: shell}, nil
 }
 
-// AddData uploads data to IPFS and returns CID
+// AddData uploads data to IPFS and returns the CID
 func (c *IPFSClient) AddData(data []byte) (string, error) {
 	reader := bytes.NewReader(data)
 	cid, err := c.Shell.Add(reader)
@@ -63,4 +65,18 @@ func (c *IPFSClient) GetData(cid string) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+// roundTripperWithAuth adds Pinata authentication headers to requests
+type roundTripperWithAuth struct {
+	transport *http.Transport
+	apiKey    string
+	secret    string
+}
+
+func (r roundTripperWithAuth) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Add Pinata authentication headers
+	req.Header.Set("pinata_api_key", r.apiKey)
+	req.Header.Set("pinata_secret_api_key", r.secret)
+	return r.transport.RoundTrip(req)
 }

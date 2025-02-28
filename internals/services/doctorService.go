@@ -114,7 +114,7 @@ func (ds *DoctorService) SearchPatients(name string) ([]*models.User, error) {
 			continue
 		}
 		user.UID = doc.Ref.ID
-		if patientName, ok := user.Name.(string); ok && strings.Contains(strings.ToLower(patientName), strings.ToLower(name)) {
+		if strings.Contains(strings.ToLower(user.Name), strings.ToLower(name)) { // Use user.Name directly
 			results = append(results, &user)
 		}
 	}
