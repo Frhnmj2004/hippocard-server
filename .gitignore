@@ -1,0 +1,68 @@
+# Go specific
+*.go
+*.exe
+*.test
+*.out
+go.sum
+vendor/
+
+# Hardhat/Solidity specific
+node_modules/
+artifacts/
+cache/
+build/
+blockchain/artifacts/
+blockchain/cache/
+blockchain/build/
+contracts/Lock.sol
+contracts/*.swp
+contracts/*.swo
+contracts/*.log
+
+# Firebase credentials and sensitive files
+configs/firebase_credentials.json
+.env
+*.key
+*.pem
+
+# IPFS/Pinata credentials
+*.ipfs
+*.pinata
+
+# Blockchain related
+*.abi
+*.bin
+*.json (except specific contract artifacts needed for abigen, handle manually)
+
+# Temporary files and IDE-specific
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+
+# Compiled binaries and outputs
+bin/
+obj/
+dist/
+
+# Test files
+test/
+tests/
+*.test
+
+# Docker and deployment
+deployment/docker/*.log
+deployment/docker/*.tmp
+
+# Miscellaneous
+*.gz
+*.zip
+*.tar
+*.rar
+*.7z
