@@ -33,3 +33,28 @@ func (ac *AuthClient) VerifyIDToken(token string) (*auth.Token, error) {
 	}
 	return verifiedToken, nil
 }
+
+// SetCustomClaims sets role-based claims for a user (Admin SDK)
+func (ac *AuthClient) SetCustomClaims(uid, role string) error {
+	ctx := context.Background()
+	params := (&auth.UserToUpdate{}).CustomClaims(map[string]interface{}{
+		"role": role,
+	})
+	_, err := ac.Client.UpdateUser(ctx, uid, params)
+	if err != nil {
+		log.Printf("Failed to set custom claims for user %s: %v", uid, err)
+		return err
+	}
+	return nil
+}
+
+// GetUserByUID retrieves user info to verify or manage roles
+func (ac *AuthClient) GetUserByUID(uid string) (*auth.UserRecord, error) {
+	ctx := context.Background()
+	user, err := ac.Client.GetUser(ctx, uid)
+	if err != nil {
+		log.Printf("Failed to get user %s: %v", uid, err)
+		return nil, err
+	}
+	return user, nil
+}
