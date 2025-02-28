@@ -61,7 +61,7 @@ contract PrescriptionNFT is ERC721, Ownable {
         return tokenId;
     }
 
-    // 🔹 **View prescription details (based on role)**
+    // 🔹 **View prescription details (Doctor, Patient, Pharmacist, or Hospital)**
     function getPrescriptionDetails(uint256 tokenId) 
         external 
         view 
@@ -90,7 +90,7 @@ contract PrescriptionNFT is ERC721, Ownable {
 
         uint256 counter = 0;
         for (uint256 tokenId = 1; tokenId < _tokenIdCounter; tokenId++) {
-            if (_exists(tokenId) && ownerOf(tokenId) == patient) {
+            if (_prescriptions[tokenId].isActive || ownerOf(tokenId) == patient) {
                 history[counter] = _prescriptions[tokenId];
                 counter++;
             }
