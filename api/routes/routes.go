@@ -1,27 +1,24 @@
 package routes
 
 import (
-	"log"
-
-	"github.com/Frhnmj2004/hippocard-server/api/controllers"
 	"github.com/Frhnmj2004/hippocard-server/api/middleware"
 	"github.com/Frhnmj2004/hippocard-server/pkg/blockchain"
-
 	"github.com/Frhnmj2004/hippocard-server/pkg/firebase"
 	"github.com/Frhnmj2004/hippocard-server/pkg/storage"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// Repository holds all service clients for routing
+// Repository holds all clients and services for routing
 type Repository struct {
 	Auth       *firebase.AuthClient
 	Firestore  *firebase.FirestoreClient
 	Blockchain *blockchain.Client
 	IPFS       *storage.IPFSClient
+	App        *fiber.App
 }
 
-// NewRepository creates a new Repository instance
+// NewRepository initializes a new Repository
 func NewRepository(auth *firebase.AuthClient, firestore *firebase.FirestoreClient, blockchain *blockchain.Client, ipfs *storage.IPFSClient) *Repository {
 	return &Repository{
 		Auth:       auth,
@@ -31,44 +28,42 @@ func NewRepository(auth *firebase.AuthClient, firestore *firebase.FirestoreClien
 	}
 }
 
-// SetupRoutes configures all API routes with Fiber
-func (r *Repository) SetupRoutes(app *fiber.App) {
-	// Initialize controllers
-	authCtrl := controllers.NewAuthController(r)
-	patientCtrl := controllers.NewPatientController(r)
-	doctorCtrl := controllers.NewDoctorController(r)
-	pharmacistCtrl := controllers.NewPharmacistController(r)
-	hospitalCtrl := controllers.NewHospitalController(r)
+// SetupRoutes sets up all API routes using provided handlers
+func (r *Repository) SetupRoutes(app *fiber.App, loginHandler func(*fiber.Ctx) error,
+	patientProfileHandler func(*fiber.Ctx) error,
+	patientPrescriptionsHandler func(*fiber.Ctx) error,
+	patientMedicalHistoryHandler func(*fiber.Ctx) error,
+	doctorPatientHandler func(*fiber.Ctx) error,
+	doctorPrescriptionHandler func(*fiber.Ctx) error,
+	doctorMedicalHistoryHandler func(*fiber.Ctx) error,
+	doctorSearchPatientsHandler func(*fiber.Ctx) error,
+	pharmacistActivePrescriptionsHandler func(*fiber.Ctx) error,
+	pharmacistDispenseHandler func(*fiber.Ctx) error,
+	hospitalPatientDataHandler func(*fiber.Ctx) error) {
+	r.App = app
 
-	// Public routes (e.g., login)
-	app.Post("/api/login", authCtrl.LoginHandler) // Placeholder for auth logic
+	// Public routes
+	app.Post("/api/login", loginHandler)
 
-	// Patient routes (authenticated)
+	// Patient routes
 	patient := app.Group("/api/patient", middleware.AuthMiddleware(r.Auth, "patient"))
-	patient.Get("/profile", patientCtrl.ProfileHandler) // Placeholder for
-	patient.Get("/prescriptions", patientCtrl.PrescriptionsHandler)
-	patient.Get("/medical-history", patientCtrl.MedicalHistoryHandler)
+	patient.Get("/profile", patientProfileHandler)
+	patient.Get("/prescriptions", patientPrescriptionsHandler)
+	patient.Get("/medical-history", patientMedicalHistoryHandler)
 
-	// Doctor routes (authenticated)
+	// Doctor routes
 	doctor := app.Group("/api/doctor", middleware.AuthMiddleware(r.Auth, "doctor"))
-	doctor.Get("/patient/:nfc_id", doctorCtrl.GetPatientHandler)
-	doctor.Post("/prescription", doctorCtrl.CreatePrescriptionHandler)
-	doctor.Post("/medical-history", doctorCtrl.AddMedicalHistoryHandler)
-	doctor.Get("/patients/search", doctorCtrl.SearchPatientsHandler)
+	doctor.Get("/patient/:nfc_id", doctorPatientHandler)
+	doctor.Post("/prescription", doctorPrescriptionHandler)
+	doctor.Post("/medical-history", doctorMedicalHistoryHandler)
+	doctor.Get("/patients/search", doctorSearchPatientsHandler)
 
-	// Pharmacist routes (authenticated)
+	// Pharmacist routes
 	pharmacist := app.Group("/api/pharmacy", middleware.AuthMiddleware(r.Auth, "pharmacist"))
-	pharmacist.Get("/prescriptions/active/:nfc_id", pharmacistCtrl.ActivePrescriptionsHandler)
-	pharmacist.Post("/prescription/dispense", pharmacistCtrl.DispensePrescriptionHandler)
+	pharmacist.Get("/prescriptions/active/:nfc_id", pharmacistActivePrescriptionsHandler)
+	pharmacist.Post("/prescription/dispense", pharmacistDispenseHandler)
 
-	// Hospital routes (authenticated, one-time access)
+	// Hospital routes (with one-time access)
 	hospital := app.Group("/api/hospital", middleware.AuthMiddleware(r.Auth, "hospital"), middleware.OneTimeAccess(r.Auth, r.Firestore))
-	hospital.Get("/patient/:nfc_id", hospitalCtrl.PatientDataHandler) // One-time access logic TBD
-}
-
-func (r *Repository) AuthMiddleware(role string) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		log.Println("Auth middleware not implemented yet for role:", role)
-		return c.Next()
-	}
+	hospital.Get("/patient/:nfc_id", hospitalPatientDataHandler)
 }

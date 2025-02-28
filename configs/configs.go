@@ -33,7 +33,7 @@ func LoadConfig() (*Config, error) {
 	config := &Config{
 		ServerPort: getEnv("SERVER_PORT", "8080"),
 		Firebase: FirebaseConfig{
-			CredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", ""),
+			CredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", "configs/firebase-credentials.json"),
 		},
 		Blockchain: BlockchainConfig{
 			RPCURL:          getEnv("POLYGON_RPC", "https://rpc-mumbai.maticvigil.com"),
