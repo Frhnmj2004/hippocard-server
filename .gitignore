@@ -17,11 +17,6 @@ configs/firebase_credentials.json
 *.ipfs
 *.pinata
 
-# Blockchain related
-*.abi
-*.bin
-*.json (except specific contract artifacts needed for abigen, handle manually)
-
 # Temporary files and IDE-specific
 *.log
 *.tmp
@@ -34,10 +29,7 @@ configs/firebase_credentials.json
 __pycache__/
 *.pyc
 
-# Compiled binaries and outputs
-bin/
-obj/
-dist/
+
 
 # Test files
 test/
