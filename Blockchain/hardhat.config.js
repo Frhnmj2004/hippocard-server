@@ -1,19 +1,22 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
 
 module.exports = {
-  solidity: "0.8.0",
-  paths: {
-    sources: "./contracts",
-    artifacts: "./build",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.0",
+      },
+      {
+        version: "0.8.20",
+      },
+      {
+        version: "0.8.28",
+      },
+    ],
   },
   networks: {
-    mumbai: {
-      url: "https://rpc-mumbai.maticvigil.com",
-      accounts: [process.env.PRIVATE_KEY],
+    hardhat: {
+      chainId: 1337,
     },
-  },
-  etherscan: {
-    apiKey: process.env.POLYGONSCAN_API_KEY,
   },
 };
